@@ -1,0 +1,42 @@
+---
+
+- name: configure systemd service
+  template:
+    src: node_exporter.service.j2
+    dest: /etc/systemd/system/node_exporter.service
+  register: systemd_service
+
+- name: reload systemd services
+  command: /usr/bin/systemctl daemon-reload
+  when: systemd_service | changed
+
+- name: configure service
+  template:
+    src: sysconfig-node_exporter.j2
+    dest: /etc/sysconfig/node_exporter
+  notify: restart node_exporter
+
+- name: start systemd service
+  service:
+    name: node_exporter
+    state: started
+    enabled: yes
+
+- name: add firewall node_exporter service
+  template:
+    src: firewalld-node_exporter.xml.j2
+    dest: /etc/firewalld/services/node_exporter.xml
+  register: firewalld_service
+
+- name: restart firewall service
+  # we don't reload the service by SIGHUP, because this leads to instability issues
+  service: name=firewalld state=restarted
+  when: firewalld_service | changed
+
+- name: allow firewall node_exporter port for Prometheus server
+  firewalld:
+    rich_rule: "rule family='{{ item.family }}' source address='{{ item.address }}' service name='node_exporter' accept"
+    state: enabled
+    permanent: yes
+    immediate: yes
+  with_items: "{{ prometheus_ip_networks }}"

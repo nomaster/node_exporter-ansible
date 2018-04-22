@@ -1,0 +1,12 @@
+---
+
+cache_dir: /var/cache
+node_exporter_tarball: "{{ cache_dir }}/node_exporter.tar.gz"
+node_exporter_dir: /opt
+node_exporter_address: "{{ ansible_default_ipv4.address }}"
+node_exporter_port: "9100"
+prometheus_ip_networks:
+  - family: ipv4
+    address: "0.0.0.0/0"
+  - family: ipv6
+    address: "::/0"

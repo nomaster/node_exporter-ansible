@@ -1,0 +1,19 @@
+---
+
+- name: download tarball
+  get_url:
+    url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter.version }}/node_exporter-{{ node_exporter.version }}.linux-amd64.tar.gz"
+    checksum: "{{ node_exporter.checksum }}"
+    dest: "{{ node_exporter_tarball }}"
+
+- name: unarchive tarball
+  unarchive:
+    src: "{{ node_exporter_tarball }}"
+    dest: "{{ node_exporter_dir }}"
+    copy: no
+
+- name: link current version
+  file:
+    src: "node_exporter-{{ node_exporter.version }}.linux-amd64"
+    dest: "{{ node_exporter_dir }}/node_exporter"
+    state: link

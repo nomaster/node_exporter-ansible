@@ -1,0 +1,14 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description=Prometheus node exporter
+Documentation=https://prometheus.io
+After=network.target
+
+[Service]
+Type=simple
+EnvironmentFile=-/etc/sysconfig/node_exporter
+ExecStart={{ node_exporter_dir }}/node_exporter/node_exporter $NODE_EXPORTER_OPTS
+
+[Install]
+WantedBy=multi-user.target
